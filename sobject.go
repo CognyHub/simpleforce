@@ -362,9 +362,19 @@ func (obj *SObject) AttributesField() *SObjectAttributes {
 }
 
 // Set indexes value into SObject instance with provided key. The same SObject pointer is returned to allow
-// chained access.
+// chained access.`
 func (obj *SObject) Set(key string, value interface{}) *SObject {
 	(*obj)[key] = value
+	return obj
+}
+
+func (obj *SObject) SetRelationship(key string, value interface{}, objectType string) *SObject {
+	var newObject = make(map[string]interface{}, 0)
+	var attributesObject = make(map[string]interface{}, 0)
+	attributesObject["type"] = objectType
+	newObject["attributes"] = attributesObject
+	newObject[strings.Split(key, ".")[1]] = value
+	(*obj)[strings.Split(key, ".")[0]] = newObject
 	return obj
 }
 
