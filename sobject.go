@@ -3,7 +3,6 @@ package simpleforce
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -133,7 +132,7 @@ func (obj *SObject) Create() (*SObject, error) {
 	respData, err := obj.client().httpRequest(http.MethodPost, url, bytes.NewReader(reqData))
 	if err != nil {
 		log.Println(logPrefix, "failed to process http request,", err)
-		return nil, errors.New(fmt.Sprintf("%v", string(respData)))
+		return nil, err
 	}
 
 	err = obj.setIDFromResponseData(respData)
