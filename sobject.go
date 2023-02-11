@@ -149,7 +149,7 @@ func (obj *SObject) Create() (*SObject, error) {
 func (obj *SObject) Update() (*SObject, error) {
 	if obj.Type() == "" || obj.client() == nil || obj.ID() == "" {
 		// Sanity check.
-		return nil
+		return nil, errors.New("SObject type not set")
 	}
 
 	// Make a copy of the incoming SObject, but skip certain metadata fields as they're not understood by salesforce.
