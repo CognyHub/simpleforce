@@ -3,6 +3,7 @@ package simpleforce
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -114,10 +115,10 @@ func (obj *SObject) Get(id ...string) *SObject {
 // If the creation is successful, the ID of the SObject instance is updated with the ID returned. Otherwise, nil is
 // returned for failures.
 // Ref: https://developer.salesforce.com/docs/atlas.en-us.214.0.api_rest.meta/api_rest/dome_sobject_create.htm
-func (obj *SObject) Create() *SObject {
+func (obj *SObject) Create() (*SObject, error) {
 	if obj.Type() == "" || obj.client() == nil {
 		// Sanity check.
-		return nil
+		return nil, errors.New("SObject type not set")
 	}
 
 	// Make a copy of the incoming SObject, but skip certain metadata fields as they're not understood by salesforce.
@@ -125,23 +126,23 @@ func (obj *SObject) Create() *SObject {
 	reqData, err := json.Marshal(reqObj)
 	if err != nil {
 		log.Println(logPrefix, "failed to convert sobject to json,", err)
-		return nil
+		return nil, err
 	}
 
 	url := obj.client().makeURL("sobjects/" + obj.Type() + "/")
 	respData, err := obj.client().httpRequest(http.MethodPost, url, bytes.NewReader(reqData))
 	if err != nil {
 		log.Println(logPrefix, "failed to process http request,", err)
-		return nil
+		return nil, errors.New(fmt.Sprintf("%v", string(respData)))
 	}
 
 	err = obj.setIDFromResponseData(respData)
 	if err != nil {
 		log.Println(logPrefix, "failed to parse response,", err)
-		return nil
+		return nil, errors.New("failed to parse response")
 	}
 
-	return obj
+	return obj, nil
 }
 
 // Update updates SObject in place. Upon successful, same SObject is returned for chained access.
